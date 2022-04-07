@@ -1,48 +1,58 @@
+import React, { Component } from 'react';
+import ReactGA from 'react-ga';
+import $ from 'jquery';
 import './App.css';
-import 'antd/dist/antd.css'
-import Sidebar from './Sidebar'
-import { BrowserRouter as Router, Route, Switch} from 'react-router-dom';
-import Home from './Home'
-import NavBar from "./NavBar";
-import React, { useState } from "react";
-import {Layout} from "antd";
-import TopicMenu from "./TopicMenu"
-import Experience from './Experience'
-import Education from "./Education"
-import Skills from "./Skills"
+import Header from './Components/Header';
+import Footer from './Components/Footer';
+import About from './Components/About';
+import Resume from './Components/Resume';
+import Contact from './Components/Contact';
+import Testimonials from './Components/Testimonials';
+import Portfolio from './Components/Portfolio';
 
-function App() {
-  const topics = ["About", "Experience", "Education", "Skills", "Interests", "Projects", "Awards"];
-  const content = [<Home/>, <Experience/>, <Education/>, <Skills/>]
-  const [contentIndex, setContentIndex] = useState(0);
-  const [selectedKey, setselectedKey] = useState(0);
-  const changeSelectedKey = (event) => {
-    const key = event.key;
-    setselectedKey(key);
-    setContentIndex(key);
-  };
-  const Menu = (
-    <TopicMenu
-    topics = {topics}
-    selectedKey = {selectedKey}
-    changeSelectedKey = {changeSelectedKey}
-    />
-  );
-  return (
-    <div className="App">
-      <Layout className="layout">
-      <NavBar menu = { Menu }/>
+class App extends Component {
 
-      <Layout>
-      <Sidebar menu = {Menu} />
+  constructor(props){
+    super(props);
+    this.state = {
+      foo: 'bar',
+      resumeData: {}
+    };
 
-        <Layout.Content className="content">
-              <div>{content[contentIndex]}</div>
-        </Layout.Content>
-      </Layout>
-      </Layout>
+    ReactGA.initialize('UA-110570651-1');
+    ReactGA.pageview(window.location.pathname);
+
+  }
+
+  getResumeData(){
+    $.ajax({
+      url:'/resumeData.json',
+      dataType:'json',
+      cache: false,
+      success: function(data){
+        this.setState({resumeData: data});
+      }.bind(this),
+      error: function(xhr, status, err){
+        console.log(err);
+        alert(err);
+      }
+    });
+  }
+
+  componentDidMount(){
+    this.getResumeData();
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <Header data={this.state.resumeData.main}/>
+        <About data={this.state.resumeData.main}/>
+        <Resume data={this.state.resumeData.resume}/>
+        <Footer data={this.state.resumeData.main}/>
       </div>
-  );
+    );
+  }
 }
 
 export default App;
